@@ -4,3 +4,5 @@ export const SFTP_CONFIG_DEFAULT = {
     username:'demo',
     password: 'password'
 }
+
+export const DEFAULT_DESTINATION_DIR = './destination';

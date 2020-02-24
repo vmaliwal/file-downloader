@@ -1,13 +1,16 @@
 import EventEmitter from 'events';
+import path from 'path';
 import RemoteFileInfo from '../file/remoteFileInfo';
+import LocalFileHandler from '../file/localFileInfo';
 
 export default class BaseRequester extends EventEmitter {
-    constructor(urlParser) {
+    constructor(urlParser, destinationDir) {
         super();
         this.__request = null;
 
         this.urlParser = urlParser;
         this.remoteFileInfo = new RemoteFileInfo(urlParser);
+        this.destinationFileHandler = this.__setUpDestination(destinationDir);
 
         this.requestStream = null;
         this.responseStream = null;
@@ -29,6 +32,17 @@ export default class BaseRequester extends EventEmitter {
         }
 
         return this.__removeNull(origin);
+    }
+
+    getDestionation() {
+        const fileHandler = this.__getDestinationFileHandler();
+        return {
+            file: {
+                name: fileHandler.getFileName(),
+                path: fileHandler.getFilePath(),
+                absolutePath: path.join(fileHandler.getFilePath(), fileHandler.getFileName())
+            }
+        }
     }
 
     __removeNull(obj) {
@@ -59,5 +73,21 @@ export default class BaseRequester extends EventEmitter {
 
     __getRequest() {
         return this.__request;
+    }
+
+    // destination dir should be a path object
+    __setUpDestination(destinationDir) {
+        const remoteFileName = this.remoteFileInfo.getFileName();
+
+        return new LocalFileHandler(remoteFileName, destinationDir);
+
+    }
+
+    cleanUp() {
+        this.destinationFileHandler.cleanUp();
+    }
+
+    __getDestinationFileHandler() {
+        return this.destinationFileHandler;
     }
 }

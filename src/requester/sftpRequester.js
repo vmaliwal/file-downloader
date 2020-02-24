@@ -1,5 +1,4 @@
 import BaseRequester from './baseRequester';
-import fs from 'fs';
 
 const Client = require('ssh2-sftp-client');
 
@@ -7,45 +6,53 @@ import { SFTP_CONFIG_DEFAULT } from '../config';
 
 
 export default class SftpRequester extends BaseRequester {
-    constructor(urlParser) {
-        super(urlParser);
+    constructor(urlParser, destionationDir) {
+        super(urlParser, destionationDir);
+        this.sftpClient = this.__getFreshSftpClient()
     }
 
-    request() {
-        const sftpClient = this.__getFreshSftpClient();
-        const config = this.__getConfig();
-        const { path } = this.getOrigin();
-        const writeStream = fs.createWriteStream('./download.txt');
+    async request() {
+        const { path: remotePath } = this.getOrigin();
+        const { file: destinationFile } = this.getDestionation();
+        const { absolutePath: destinationPath } = destinationFile;
 
-        sftpClient.on('connect', () => {
-            console.log("success connect");
-        })
-        sftpClient.on('data', (data) => {
-            console.log("success data");
-            console.log(data);
-        })
 
-        sftpClient.connect(config)
-            .then((sftpWrapper) => {
-                console.log("we have wrapper");
-                // console.log(sftpWrapper);
-                sftpClient.get(path, writeStream)
-                .then(buff => {
-                    console.log("we finally have buff data");
-                    console.log(buff);
-                })
-            })
-        
-        // sftpClient.on("data", (data) => {
-        //     console.log("we have listened for data");
-        //     console.log(data);
-        // })
-        
+        this.sftpClient.on('connect', () => {
+            // emit event start
+            this.emit('START', {msg: "Connection successful"})
+        });
+
+        this.sftpClient.on('error', (err) => {
+            this.emit('ERROR', {error: err});
+        });
+
+        await this.__connect();
+        // emit event download
+
+        this.emit('DOWNLOAD', { msg: "download has started" });
+
+        // replace download with localpath
+        this.sftpClient
+        .fastGet(remotePath, destinationPath,  {
+            step: (total_transferred, chunk, total) => {    
+                // emit event progress
+                this.emit('PROGRESS', {msg: total_transferred });
+                console.log(total_transferred, chunk, total);
+                // also once total_transferred === total, emit event end
+            }
+        })
+        .catch(err => {
+            this.emit('ERRPR', {error: err});
+        });
+        // emit event error in catch block
+
         return this;
     }
 
     
-    __connect() {
+    async __connect() {
+        const config = this.__getConfig();
+        await this.sftpClient.connect(config);
     }
 
     __getFreshSftpClient() {
