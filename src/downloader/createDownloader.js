@@ -1,9 +1,9 @@
 import UrlParser from '../urlParser';
-import HttpsRequester from './httpsRequester';
-import SftpRequester from './sftpRequester';
-import FtpRequester from './sftpRequester';
+import HttpsDownloader from './httpsDownloader';
+import SftpDownloader from './sftpDownloader';
+import FtpRequester from './sftpDownloader';
 
-export default function createRequester(url, destinationFolder) {
+export default function createDownloader(url, destinationFolder) {
     const _url = url;
     const _destinationFolder = destinationFolder;
 
@@ -16,11 +16,11 @@ export default function createRequester(url, destinationFolder) {
         if (!protocol) new Error("Protocol not supported");
 
         if (protocol.indexOf("http:") !== -1 || protocol.indexOf("https:") !== -1) 
-            return new HttpsRequester(urlParser, destination);
+            return new HttpsDownloader(urlParser, destination);
         else if (protocol.indexOf("sftp:") !== -1) 
-            return new SftpRequester(urlParser, destination);
+            return new SftpDownloader(urlParser, destination);
         else if (protocol === "ftp:")
-            return new SftpRequester(urlParser, destination);
+            return new SftpDownloader(urlParser, destination);
         else throw new Error("Protocol not supported");
     }
 

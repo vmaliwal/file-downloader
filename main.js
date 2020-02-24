@@ -1,5 +1,5 @@
-import SftpRequester from "./src/requester/sftpRequester";
-import HttpsRequester from './src/requester/httpsRequester';
+import SftpDownloader from "./src/downloader/sftpDownloader";
+import HttpsDownloader from './src/downloader/httpsDownloader';
 import URLParser from "./src/UrlParser";
 import path from 'path';
 import fs, { mkdir } from 'fs';
@@ -24,7 +24,7 @@ const Main = async () => {
         });
     }
 
-    const requester = new HttpsRequester(url, destinationPath);
+    const requester = new HttpsDownloader(url, destinationPath);
     requester.on('START', (data) => {
         console.log("started :", data);
     })
