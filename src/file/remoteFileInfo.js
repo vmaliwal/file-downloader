@@ -2,16 +2,24 @@ export default class RemoteFileInfo {
     constructor(urlParser) {
         this.__urlParser = urlParser;
 
-        this.fileName = this.getFileName();
-        this.filePath = this.getFilePath();
+        this.fileName = this.__getFileName();
+        this.filePath = this.__getFilePath();
     }
 
     getFileName() {
+        return this.fileName;
+    }
+
+    getFilePath() {
+        return this.filePath;
+    }
+
+    __getFileName() {
         const arr = this.__getPathArray();
         return arr.pop()
     }
 
-    getFilePath() {
+    __getFilePath() {
         const arr = this.__getPathArray();
         // discard file name
         arr.pop()

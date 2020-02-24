@@ -40,5 +40,9 @@ export default class LocalFileHandler {
     __getDestination() {
         return path.join(this.getFilePath(), this.getFileName());
     }
+    
+    getWriteStream() {
+        return this._writeStream;
+    }
 
 }

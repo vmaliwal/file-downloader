@@ -26,8 +26,11 @@ export default class SftpRequester extends BaseRequester {
             this.emit('ERROR', {error: err});
         });
 
+        this.sftpClient.on('end', () => {
+            this.emit('END', {msg: "Connection Ended"});
+        });
+
         await this.__connect();
-        // emit event download
 
         this.emit('DOWNLOAD', { msg: "download has started" });
 
@@ -40,6 +43,9 @@ export default class SftpRequester extends BaseRequester {
                 console.log(total_transferred, chunk, total);
                 // also once total_transferred === total, emit event end
             }
+        })
+        .then(() => {
+            this.sftpClient.end();
         })
         .catch(err => {
             this.emit('ERRPR', {error: err});
