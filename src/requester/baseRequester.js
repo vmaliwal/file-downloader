@@ -2,6 +2,7 @@ import EventEmitter from 'events';
 import path from 'path';
 import RemoteFileInfo from '../file/remoteFileInfo';
 import LocalFileHandler from '../file/localFileHandler';
+import { DOWNLOAD_EVENTS } from '../config';
 
 export default class BaseRequester extends EventEmitter {
     constructor(urlParser, destinationDir) {
@@ -10,6 +11,7 @@ export default class BaseRequester extends EventEmitter {
         this.urlParser = urlParser;
         this.remoteFileInfo = new RemoteFileInfo(urlParser);
         this.destinationFileHandler = this.__setUpDestination(destinationDir);
+        this.events = DOWNLOAD_EVENTS;
     }
     
     getOrigin() {

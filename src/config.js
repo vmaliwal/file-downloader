@@ -6,3 +6,11 @@ export const SFTP_CONFIG_DEFAULT = {
 }
 
 export const DEFAULT_DESTINATION_DIR = './downloads';
+
+export const DOWNLOAD_EVENTS = {
+    START: "START",
+    DOWNLOAD: "DOWNLOAD",
+    PROGRESS: "PROGRESS",
+    ERROR: "ERROR",
+    END: "END"
+}
