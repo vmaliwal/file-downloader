@@ -1,7 +1,7 @@
 import UrlParser from '../urlParser';
 import HttpsDownloader from './httpsDownloader';
 import SftpDownloader from './sftpDownloader';
-import FtpRequester from './sftpDownloader';
+import FtpDownloader from './sftpDownloader';
 
 export default function createDownloader(url, destinationFolder) {
     const _url = url;
@@ -20,7 +20,7 @@ export default function createDownloader(url, destinationFolder) {
         else if (protocol.indexOf("sftp:") !== -1) 
             return new SftpDownloader(urlParser, destination);
         else if (protocol === "ftp:")
-            return new SftpDownloader(urlParser, destination);
+            return new FtpDownloader(urlParser, destination);
         else throw new Error("Protocol not supported");
     }
 

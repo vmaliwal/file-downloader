@@ -4,6 +4,7 @@ export default class RemoteFileInfo {
 
         this.fileName = this.__getFileName();
         this.filePath = this.__getFilePath();
+        this.fileSize = 0;
     }
 
     getFileName() {
@@ -12,6 +13,14 @@ export default class RemoteFileInfo {
 
     getFilePath() {
         return this.filePath;
+    }
+
+    getFileSize() {
+        return this.fileSize;
+    }
+
+    setFileSize(size) {
+        this.fileSize = size;
     }
 
     __getFileName() {

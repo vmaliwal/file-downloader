@@ -14,6 +14,13 @@ export default class BaseDownloader extends EventEmitter {
         (destinationDir);
 
         this.__progress = 0;
+        this.__totalSize = this.__getTotalSize();
+        this.__downloadedSize = 0;
+        this.__stats = {
+            time: 0,
+            bytes: 0,
+            prevBytes: 0
+        }
     }
     
     getOrigin() {
@@ -70,23 +77,92 @@ export default class BaseDownloader extends EventEmitter {
     }
 
     onStart() {
-        this.emit(DOWNLOAD_EVENTS.START, { msg: "start downloading" });
+        this.emit(DOWNLOAD_EVENTS.START);
     }
 
-    onDownload() {
-        this.emit(DOWNLOAD_EVENTS.DOWNLOAD, { msg: "Begin download" });
+    onDownload(fileSize) {
+        this.__setTotalSize(fileSize);
+        const stats = this.__getStats();
+        this.emit(DOWNLOAD_EVENTS.DOWNLOAD, { data: stats });
     }
 
-    onProgress(progress) {
-        this.__progress += progress;
-        this.emit(DOWNLOAD_EVENTS.PROGRESS, { msg: this.__progress });
+    onProgress(chunkLength) {
+        const stats = this.__calculateStats(chunkLength);
+        this.emit(DOWNLOAD_EVENTS.PROGRESS, { data: stats });
     }
 
     onEnd() {
-        this.emit(DOWNLOAD_EVENTS.END, { msg: `ended` });
+        const stats = this.__getStats();
+        this.emit(DOWNLOAD_EVENTS.END, { data: stats });
     }
 
     onError(err) {
         this.emit(DOWNLOAD_EVENTS.ERROR, { error: err });
+    }
+
+    __calculateStats(chunkLength) {
+        const now = new Date();
+        const timeSoFar = now - this.__stats.time;
+        const totalSize = this.__getTotalSize();
+        const downloadedSize = this.__getDownloadedSize();
+
+        this.__updateDownloaded(chunkLength);
+
+        this.__progress = this.__calculateProgress();
+
+        if (downloadedSize === totalSize || timeSoFar > 1000) {
+            this.__stats.time = now;
+            this.__stats.bytes = downloadedSize - this.__stats.prevBytes;
+            this.__stats.prevBytes = downloadedSize;
+        }
+
+        return this.__getStats();
+    }
+
+    __updateDownloaded(chunkLength) {
+        this.__downloadedSize += chunkLength;
+    }
+
+    __calculateProgress() {
+        const totalSize = this.__getTotalSize();
+        return (this.__downloadedSize/totalSize) * 100;
+    }
+
+    __getStats() {
+        const fileName = this.destinationFileHandler.getFileName();
+        const filePath = this.destinationFileHandler.getFilePath();
+
+        return {
+            total: this.__getTotalSize(),
+            name: fileName,
+            path: filePath,
+            downloaded: this.__getDownloadedSize(),
+            progress: this.__getProgress(),
+            speed: this.__getDownloadSpeed()
+        }
+    }
+
+    __getTotalSize() {
+        return this.remoteFileInfo.getFileSize();
+    }
+
+    __setTotalSize(size) {
+        this.__updateRemoteFileSize(size);
+    }
+
+    __updateRemoteFileSize(size) {
+        this.remoteFileInfo.setFileSize(size);
+    }
+
+    __getProgress() {
+        return this.__progress;
+    }
+
+    __getDownloadedSize() {
+        return this.__downloadedSize;
+    }
+
+    __getDownloadSpeed() {
+        return this.__stats.bytes;
     }
 }

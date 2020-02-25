@@ -16,8 +16,7 @@ export default class SftpDownloader extends BaseDownloader {
         const { file: destinationFile } = this.getDestionation();
         const { absolutePath: destinationPath } = destinationFile;
 
-        this.sftpClient.on('connect', () => {
-            // emit event start
+        this.sftpClient.on('connect', async () => {
             this.onStart();
         });
 
@@ -31,7 +30,8 @@ export default class SftpDownloader extends BaseDownloader {
 
         await this.__connect();
 
-        this.onDownload();
+        const fileStat = await this.__getRemoteFileStats();
+        this.onDownload(fileStat);
 
         // replace download with localpath
         this.sftpClient
@@ -66,5 +66,10 @@ export default class SftpDownloader extends BaseDownloader {
             ...SFTP_CONFIG_DEFAULT,
             ...this.getOrigin(),
         }
+    }
+
+    async __getRemoteFileStats() {
+       const { path: remotePath } = this.getOrigin();
+       return await this.sftpClient.stat(remotePath);
     }
 }

@@ -12,17 +12,13 @@ export default class HttpsDownloader extends BaseDownloader {
         this.onStart();
 
         const { href } = this.getOrigin();
-
-        this.onDownload();
-
         const stream = await axios.get(href, {responseType: 'stream'});
         const readStream = stream.data;
+        const fileStat = this.__getRemoteFileStats(readStream);
 
-        //TODO:::
-        // In the base class create methods like onProgress, onStart
-        // call this helper methods here rather than emitting events
-        // this helper methods like onStart would eventually emit an
-        // event. This will provide a standard way of emitting events
+        this.onDownload(fileStat);
+
+
         readStream.on('data', chunk => {
             this.onProgress(chunk.length);
         });
@@ -39,6 +35,10 @@ export default class HttpsDownloader extends BaseDownloader {
         readStream.pipe(writeStream);
 
         return this;
+    }
+
+    __getRemoteFileStats(response) {
+        return parseInt(response.headers['content-length']);
     }
 
 }
