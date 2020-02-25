@@ -12,6 +12,9 @@ export default function createDownloader(url, destinationFolder) {
     }
 
     const initDownloader = (urlParser, destination = _destinationFolder) => {
+
+        console.log(destination);
+
         const protocol = urlParser.getProtocol();
         if (!protocol) new Error("Protocol not supported");
 
