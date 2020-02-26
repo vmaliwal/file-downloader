@@ -22,6 +22,7 @@
     "ssh2-sftp-client": "^5.0.2"
   },
   "devDependencies": {
-    "jest-mock": "^25.1.0"
+    "jest-mock": "^25.1.0",
+    "stream-mock": "^2.0.5"
   }
 }

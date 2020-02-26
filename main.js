@@ -66,8 +66,8 @@ const Main = async () => {
             const bar = multiBars[i];
             bar.update(data.progress);
         })
-        downloader.on('ERROR', ({ err }) => {
-            console.log("error :", err);
+        downloader.on('ERROR', ({ error }) => {
+            console.log("error :", error);
             downloader.cleanUp();
         })
         downloader.on('END', ({ data }) => {

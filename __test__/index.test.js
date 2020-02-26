@@ -4,3 +4,5 @@ const esmImport = require('esm')(module);
 esmImport('./urlParser.assert');
 esmImport('./localFileHandler.assert');
 esmImport('./sftpDownloader.assert');
+esmImport('./ftpDownloader.assert');
+esmImport('./httpsDownloader.assert');
