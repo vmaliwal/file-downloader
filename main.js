@@ -11,7 +11,7 @@ import { makeDir } from './src/file/fileUtils';
 
 //TODOS::
 /*
-    # Add test cases
+    # Add test cases √
     # Add FTP support √
     # Add file names to be displayed √
     # Add listener when internet connection is off
@@ -22,35 +22,22 @@ import { makeDir } from './src/file/fileUtils';
     # Provide env variables for SFTP
     # test SFTP username:password link does work as expected
     # Graceful error handling. Add as many tryy catch as possible
+    # Show error if file does not exist on remote server
 
     # ftp://speedtest:speedtest@ftp.otenet.gr/test100Mb.db
 */
-const Main = async () => {
+const Main = (async() => {
     console.log("Welcome to Multi File Downloader");
 
-    const response  = await DownloaderCli();
-    const { downloadLocation, urls } = response;
+    const response  = await initCli();
+    const { urls } = response;
 
-    const queue = [];
-
-    const destination = (downloadLocation) ? downloadLocation : DEFAULT_DESTINATION_DIR;
+    const {destination, destinationPath} = getDownloadLocation(response);
     
-    const out = path.parse(__filename);
-    const destinationPath = path.join(out.dir, destination);
-
     makeDir(destinationPath);
-
-    urls.forEach(url => {
-        const downloader = createDownloader(url, destination);
-        queue.unshift(downloader);
-    });
-
-    const multiBar = new cliProgress.MultiBar({
-        format: '  [{bar}] | "{file}" | {percentage}% | {value}/{total}',
-        clearOnComplete: false,
-        hideCursor: true
-    });
-
+    
+    const queue = getDownloadersQueue(urls);
+    const multiBar = initMultiBar(); 
     const multiBars = new Array(queue.length);
 
 
@@ -69,17 +56,51 @@ const Main = async () => {
         downloader.on('ERROR', ({ error }) => {
             console.log("error :", error);
             downloader.cleanUp();
+            // also remove progress bar? maybe display an error?
         })
         downloader.on('END', ({ data }) => {
             const bar = multiBars[i];
             bar.update(data.progress);
             bar.stop();
-            // console.log("Ended :", data);
-        })
-
+        });
         downloader.download();
     });
-}
-Main();
 
+    async function initCli() {
+        return await DownloaderCli();
+    }
+
+    function getDownloadLocation(cliResponse) {
+        const { downloadLocation } = cliResponse;
+    
+        const destination = (downloadLocation) ? downloadLocation : DEFAULT_DESTINATION_DIR;
+        
+        const out = path.parse(__filename);
+        const destinationPath = path.join(out.dir, destination);
+
+        return { destination, destinationPath};
+    }
+
+    // make sure at least one url does exist?
+    function getDownloadersQueue(urls) {
+        const queue = [];
+
+        urls.forEach(url => {
+            const downloader = createDownloader(url, destination);
+            queue.unshift(downloader);
+        });
+        
+        return queue;
+    }
+
+    function initMultiBar() {
+        return new cliProgress.MultiBar({
+            format: '  [{bar}] | "{file}" | {percentage}% | {value}/{total}',
+            clearOnComplete: false,
+            hideCursor: true,
+            stopOnComplete: true,
+        });
+    }
+
+})();
 export default Main;

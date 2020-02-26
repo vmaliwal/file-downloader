@@ -63,7 +63,7 @@ export default class SftpDownloader extends BaseDownloader {
 
     __startDownload(sftpClient) {
         const { path: remotePath } = this.getOrigin();
-        const { file: destinationFile } = this.getDestionation();
+        const { file: destinationFile } = this.getDestination();
         const { absolutePath: destinationPath } = destinationFile;
 
         sftpClient

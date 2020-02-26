@@ -41,7 +41,7 @@ export default class BaseDownloader extends EventEmitter {
         return this.__removeNull(origin);
     }
 
-    getDestionation() {
+    getDestination() {
         const fileHandler = this.__getDestinationFileHandler();
         return {
             file: {

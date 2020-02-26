@@ -21,3 +21,11 @@ export const DOWNLOAD_EVENTS = {
     ERROR: "ERROR",
     END: "END"
 }
+
+export const DEFAULT_URLS = `
+    https://speed.hetzner.de/100MB.bin,
+    ftp://speedtest:speedtest@ftp.otenet.gr/test100Mb.db,
+    http://speedtest.ftp.otenet.gr/files/test100k.db,
+    sftp://demo-user:demo-user@demo.wftpserver.com:2222/download/manual_en.pdf,
+    sftp://demo-user:demo-user@demo.wftpserver.com:2222/download/wftpserver-mac-i386.tar.gz,
+`

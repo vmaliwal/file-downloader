@@ -1,37 +1,35 @@
-import cli from 'cli-ux'
+import cli from 'cli-ux';
+import Url from 'url';
+import { DEFAULT_URLS, DEFAULT_DESTINATION_DIR } from '../config';
 
 export default async function DownloaderCli (){
-
     const downloadLocation = await promptDownloadLocation();
     const downloadUrls = await promptDownloadUrls();
     const urlArray = parseUrls(downloadUrls);
 
     async function promptDownloadLocation() {
-        return await cli.prompt(`Enter download location?`, {default: './downloads'});
+        const txt = `Enter download location?`;
+        return await cli.prompt(txt, {default: DEFAULT_DESTINATION_DIR});
     }
 
-    async function promptDownloadUrls() {    
+    async function promptDownloadUrls() {
+        const txt = `Enter URLs to be downloaded seperated by comma (',')`;
         const defaults = {
-            default: `
-            https://speed.hetzner.de/100MB.bin,
-            ftp://speedtest:speedtest@ftp.otenet.gr/test100Mb.db,
-            http://speedtest.ftp.otenet.gr/files/test100k.db,
-            sftp://demo-user:demo-user@demo.wftpserver.com:2222/download/manual_en.pdf,
-            sftp://demo-user:demo-user@demo.wftpserver.com:2222/download/wftpserver-mac-i386.tar.gz
-            `
+            default: DEFAULT_URLS
         }
 
-        return await cli.prompt(`Enter URLs to be downloaded seperated by comma (',')`, defaults);
+        return await cli.prompt(txt, defaults);
     }
 
     // convert provided urls into array
     function parseUrls(urls) {
-        return urls.split(",").map(url => url.trim());
+        return urls.split(",").filter(url => validateUrl(url)).map(url => url.trim());
     }
 
     // check if URL is valid
-    const validateUrls = () => {
-
+    function validateUrl(url) {
+        const { href, host } = Url.parse(url);
+        return (href !== "" && host !== null);
     }
 
     return {

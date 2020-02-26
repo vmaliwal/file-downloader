@@ -6,3 +6,4 @@ esmImport('./localFileHandler.assert');
 esmImport('./sftpDownloader.assert');
 esmImport('./ftpDownloader.assert');
 esmImport('./httpsDownloader.assert');
+esmImport('./baseDownloader.assert');
