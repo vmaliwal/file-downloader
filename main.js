@@ -6,13 +6,14 @@ import cliProgress from 'cli-progress';
 
 import { DEFAULT_DESTINATION_DIR } from './src/config';
 import createDownloader from "./src/downloader/createDownloader";
+import { makeDir } from './src/file/fileUtils';
 
 
 //TODOS::
 /*
     # Add test cases
     # Add FTP support √
-    # Add file names to be displayed
+    # Add file names to be displayed √
     # Add listener when internet connection is off
     # Add cleanup logic when download isn't complete
     # Check if bitly link is provided we are able to download, along with correct file names
@@ -32,19 +33,15 @@ const Main = async () => {
 
     const queue = [];
 
-    const destionation = (downloadLocation) ? downloadLocation : DEFAULT_DESTINATION_DIR;
+    const destination = (downloadLocation) ? downloadLocation : DEFAULT_DESTINATION_DIR;
     
     const out = path.parse(__filename);
-    const destinationPath = path.join(out.dir, destionation);
+    const destinationPath = path.join(out.dir, destination);
 
-    if(!fs.existsSync(destinationPath)) {
-        fs.mkdir(destinationPath,  { recursive: true }, (err) => {
-            if (err) throw err;
-        });
-    }
+    makeDir(destinationPath);
 
     urls.forEach(url => {
-        const downloader = createDownloader(url, destionation);
+        const downloader = createDownloader(url, destination);
         queue.unshift(downloader);
     });
 
@@ -57,30 +54,30 @@ const Main = async () => {
     const multiBars = new Array(queue.length);
 
 
-    queue.forEach((requester, i) => {
-        requester.on('START', ({ data }) => {
+    queue.forEach((downloader, i) => {
+        downloader.on('START', ({ data }) => {
             const bar = multiBar.create(100, 0, {file: data.name });
             multiBars[i] = bar;
         })
-        requester.on('DOWNLOAD', ({ data }) => {
+        downloader.on('DOWNLOAD', ({ data }) => {
             // console.log("DOWNLOAD BEING :", data);
         })
-        requester.on('PROGRESS', ({ data }) => {
+        downloader.on('PROGRESS', ({ data }) => {
             const bar = multiBars[i];
             bar.update(data.progress);
         })
-        requester.on('ERROR', ({ err }) => {
+        downloader.on('ERROR', ({ err }) => {
             console.log("error :", err);
-            requester.cleanUp();
+            downloader.cleanUp();
         })
-        requester.on('END', ({ data }) => {
+        downloader.on('END', ({ data }) => {
             const bar = multiBars[i];
             bar.update(data.progress);
             bar.stop();
             // console.log("Ended :", data);
         })
-        
-        requester.request();
+
+        downloader.download();
     });
 }
 Main();

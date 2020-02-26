@@ -6,7 +6,6 @@ export default class LocalFileHandler {
         this.fileName = fileName;
         // default filepath should be ./downloads?
         this.filePath = filePath;
-        // create a write stream maybe?
         this._writeStream = this.__createWriteStream();
     }
 
@@ -33,9 +32,12 @@ export default class LocalFileHandler {
 
     cleanUp() {
         const destination = this.__getDestination();
-        fs.unlink(destination, (err) => {
-            if (err) console.log("error while removing file");
-        });
+        try {
+            fs.unlinkSync(destination);
+        } catch(err) {
+            console.log(`error while removing files at ${destination}`);
+            console.log(err);
+        }
     }
     __getDestination() {
         return path.join(this.getFilePath(), this.getFileName());

@@ -1,4 +1,4 @@
-import UrlParser from '../urlParser';
+import UrlParser from '../parser/urlParser';
 import HttpsDownloader from './httpsDownloader';
 import SftpDownloader from './sftpDownloader';
 import FtpDownloader from './ftpDownloader';
