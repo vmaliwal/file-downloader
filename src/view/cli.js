@@ -10,13 +10,18 @@ export default async function DownloaderCli (){
         return await cli.prompt(`Enter download location?`, {default: './downloads'});
     }
 
-    async function promptDownloadUrls() {
-
+    async function promptDownloadUrls() {    
         const defaults = {
-            default: "sftp://test.rebex.net/readme.txt, https://speed.hetzner.de/100MB.bin"
+            default: `
+            https://speed.hetzner.de/100MB.bin,
+            ftp://speedtest:speedtest@ftp.otenet.gr/test100Mb.db,
+            http://speedtest.ftp.otenet.gr/files/test100k.db,
+            sftp://demo-user:demo-user@demo.wftpserver.com:2222/download/manual_en.pdf,
+            sftp://demo-user:demo-user@demo.wftpserver.com:2222/download/wftpserver-mac-i386.tar.gz
+            `
         }
 
-        return await cli.prompt(`Enter URLs to be downloaded seperated by ',' (for example -  http://my.file.com/file.jpg, ftp://other.file.com/other.bin, sftp://and.also.this/ending.txt)`, defaults);
+        return await cli.prompt(`Enter URLs to be downloaded seperated by comma (',')`, defaults);
     }
 
     // convert provided urls into array

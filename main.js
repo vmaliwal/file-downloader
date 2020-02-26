@@ -1,6 +1,3 @@
-import SftpDownloader from "./src/downloader/sftpDownloader";
-import HttpsDownloader from './src/downloader/httpsDownloader';
-import URLParser from "./src/UrlParser";
 import path from 'path';
 import fs from 'fs';
 import DownloaderCli from './src/view/cli';
@@ -10,6 +7,23 @@ import cliProgress from 'cli-progress';
 import { DEFAULT_DESTINATION_DIR } from './src/config';
 import createDownloader from "./src/downloader/createDownloader";
 
+
+//TODOS::
+/*
+    # Add test cases
+    # Add FTP support √
+    # Add file names to be displayed
+    # Add listener when internet connection is off
+    # Add cleanup logic when download isn't complete
+    # Check if bitly link is provided we are able to download, along with correct file names
+    # move logic from main function to a seperate file
+    # Also looking into naming files if file with same names does exist
+    # Provide env variables for SFTP
+    # test SFTP username:password link does work as expected
+    # Graceful error handling. Add as many tryy catch as possible
+
+    # ftp://speedtest:speedtest@ftp.otenet.gr/test100Mb.db
+*/
 const Main = async () => {
     console.log("Welcome to Multi File Downloader");
 
@@ -31,82 +45,43 @@ const Main = async () => {
 
     urls.forEach(url => {
         const downloader = createDownloader(url, destionation);
-        queue.push(downloader);
+        queue.unshift(downloader);
     });
 
     const multiBar = new cliProgress.MultiBar({
+        format: '  [{bar}] | "{file}" | {percentage}% | {value}/{total}',
         clearOnComplete: false,
         hideCursor: true
     });
 
     const multiBars = new Array(queue.length);
 
+
     queue.forEach((requester, i) => {
-        
-        let b;
-        requester.on('START', () => {
-            b = multiBar.create(100, 0)
-            multiBars[i] = b;
-            // console.log("started :", data);
+        requester.on('START', ({ data }) => {
+            const bar = multiBar.create(100, 0, {file: data.name });
+            multiBars[i] = bar;
         })
-        requester.on('DOWNLOAD', (data) => {
+        requester.on('DOWNLOAD', ({ data }) => {
             // console.log("DOWNLOAD BEING :", data);
         })
         requester.on('PROGRESS', ({ data }) => {
             const bar = multiBars[i];
             bar.update(data.progress);
-            // console.log("PROGRESS :", data);
         })
-        requester.on('ERROR', (data) => {
-            console.log("error :", data);
+        requester.on('ERROR', ({ err }) => {
+            console.log("error :", err);
             requester.cleanUp();
         })
-        requester.on('END', ({ progress }) => {
+        requester.on('END', ({ data }) => {
             const bar = multiBars[i];
-            bar.update(progress);
+            bar.update(data.progress);
             bar.stop();
             // console.log("Ended :", data);
         })
-
+        
         requester.request();
-    })
-
-/*
-    // const url = new URLParser("sftp://test.rebex.net/readme.txt");
-
-    const url = new URLParser("https://speed.hetzner.de/100MB.bin");
-
-    const destionation = DEFAULT_DESTINATION_DIR;
-
-    const out = path.parse(__filename);
-    const destinationPath = path.join(out.dir, destionation);
-
-    if(!fs.existsSync(destinationPath)) {
-        fs.mkdir(destinationPath,  { recursive: true }, (err) => {
-            if (err) throw err;
-        });
-    }
-
-    const requester = new HttpsDownloader(url, destinationPath);
-    requester.on('START', (data) => {
-        console.log("started :", data);
-    })
-    requester.on('DOWNLOAD', (data) => {
-        console.log("DOWNLOAD BEING :", data);
-    })
-    requester.on('PROGRESS', (data) => {
-        console.log("PROGRESS :", data);
-    })
-    requester.on('ERROR', (data) => {
-        console.log("error :", data);
-        requester.cleanUp();
-    })
-    requester.on('END', (data) => {
-        console.log("Ended :", data);
-    })
-    // should be inside try catch for error handling
-    requester.request();
-*/
+    });
 }
 Main();
 

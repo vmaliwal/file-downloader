@@ -1,7 +1,5 @@
 import BaseDownloader from './baseDownloader';
-
-const Client = require('ssh2-sftp-client');
-
+import Client from 'ssh2-sftp-client';
 import { SFTP_CONFIG_DEFAULT } from '../config';
 
 
@@ -12,41 +10,45 @@ export default class SftpDownloader extends BaseDownloader {
     }
 
     async request() {
-        const { path: remotePath } = this.getOrigin();
-        const { file: destinationFile } = this.getDestionation();
-        const { absolutePath: destinationPath } = destinationFile;
-
-        this.sftpClient.on('connect', async () => {
-            this.onStart();
-        });
-
-        this.sftpClient.on('error', (err) => {
+        try {
+            const { path: remotePath } = this.getOrigin();
+            const { file: destinationFile } = this.getDestionation();
+            const { absolutePath: destinationPath } = destinationFile;
+    
+            this.sftpClient.on('connect', () => {
+                this.onStart();
+            });
+    
+            this.sftpClient.on('error', (err) => {
+                this.onError(err);
+            });
+    
+            this.sftpClient.on('end', () => {
+                this.onEnd();
+            });
+    
+            await this.__connect();
+    
+            const fileStat = await this.__getRemoteFileStats();
+            this.onDownload(fileStat.size);
+    
+            // replace download with localpath
+            this.sftpClient
+            .fastGet(remotePath, destinationPath,  {
+                step: (total_transferred, chunk) => {    
+                    // emit event progress
+                    this.onProgress(chunk);
+                }
+            })
+            .then(() => {
+                this.sftpClient.end();
+            })
+            .catch(err => {
+                this.onError(err);
+            });
+        } catch (err) {
             this.onError(err);
-        });
-
-        this.sftpClient.on('end', () => {
-            this.onEnd();
-        });
-
-        await this.__connect();
-
-        const fileStat = await this.__getRemoteFileStats();
-        this.onDownload(fileStat);
-
-        // replace download with localpath
-        this.sftpClient
-        .fastGet(remotePath, destinationPath,  {
-            step: (total_transferred, chunk, total) => {    
-                // emit event progress
-                this.onProgress(total_transferred);
-            }
-        })
-        .then(() => {
-            this.sftpClient.end();
-        })
-        .catch(err => {
-            this.onError(err);
-        });
+        }
         // emit event error in catch block
 
         return this;

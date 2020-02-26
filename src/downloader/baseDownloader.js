@@ -77,7 +77,8 @@ export default class BaseDownloader extends EventEmitter {
     }
 
     onStart() {
-        this.emit(DOWNLOAD_EVENTS.START);
+        const stats = this.__getStats();
+        this.emit(DOWNLOAD_EVENTS.START, { data: stats });
     }
 
     onDownload(fileSize) {
