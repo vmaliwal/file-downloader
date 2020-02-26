@@ -2,6 +2,7 @@ import BaseDownloader from "../src/downloader/baseDownloader";
 import URLParser from "../src/parser/urlParser";
 import RemoteFileInfo from "../src/file/remoteFileInfo";
 import LocalFileHandler from "../src/file/localFileHandler";
+import { DOWNLOAD_EVENTS } from "../src/config";
 
 describe('BASE Downloader', () => {
 
@@ -55,4 +56,61 @@ describe('BASE Downloader', () => {
         expect(destination.path).toBe(path);
         expect(destination.absolutePath).toBe(absPath);
     });
+
+    describe('Test event emmitters', () => {
+        const name = `test100k.db`;
+        let size, chunkLength;
+
+        beforeEach(() => {
+            size = 1234;
+            chunkLength = 12;
+        });
+
+        test('on start event', (done) => {
+            downloader.on(DOWNLOAD_EVENTS.START, ({data}) => {
+                expect(data).not.toBe(null);
+                expect(data.name).toBe(name);
+                expect(data.progress).toBe(0);
+                done();
+            })
+            downloader.onStart();
+        });
+
+        test('on download event', (done) => {
+            downloader.on(DOWNLOAD_EVENTS.DOWNLOAD, ({data}) => {
+                expect(data.total).toBe(size);
+                done();
+            });
+            downloader.onDownload(size);
+        });
+
+        test('on progress event', (done) => {
+            downloader.on(DOWNLOAD_EVENTS.PROGRESS, ({data}) => {
+                expect(data.progress).toBe(downloader.__calculateProgress());
+                done();
+            });
+            downloader.onDownload(size);
+            downloader.onProgress(chunkLength);
+        });
+
+        test('on end event', (done) => {
+            downloader.on(DOWNLOAD_EVENTS.END, ({data}) => {
+                expect(data.downloaded).toBe(chunkLength+chunkLength);
+                done();
+            });
+            downloader.onDownload(size);
+            downloader.onProgress(chunkLength);
+            downloader.onProgress(chunkLength);
+            downloader.onEnd();
+        });
+
+        test('on error event', (done) => {
+            const err = new Error("Random error");
+            downloader.on(DOWNLOAD_EVENTS.ERROR, (data) => {
+                expect(data.error).toBe(err);
+                done();
+            });
+            downloader.onError(err);
+        });
+    })
 });
