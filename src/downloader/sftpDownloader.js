@@ -11,13 +11,13 @@ export default class SftpDownloader extends BaseDownloader {
 
     async download() {
         try {    
-            this.__initClientListeners();
-            await this.__connect();
+            this.__initClientListeners(this.sftpClient);
+            await this.__connect(this.sftpClient);
     
-            const fileStat = await this.__getRemoteFileStats();
+            const fileStat = await this.__getRemoteFileStats(this.sftpClient);
             this.onDownload(fileStat.size);
     
-            this.__startDownload();
+            this.__startDownload(this.sftpClient);
 
         } catch (err) {
             this.onError(err);
@@ -27,9 +27,9 @@ export default class SftpDownloader extends BaseDownloader {
     }
 
     
-    async __connect() {
+    async __connect(sftpClient) {
         const config = this.__getConfig();
-        await this.sftpClient.connect(config);
+        await sftpClient.connect(config);
     }
 
     __getFreshSftpClient() {
@@ -42,39 +42,39 @@ export default class SftpDownloader extends BaseDownloader {
         }
     }
 
-    async __getRemoteFileStats() {
+    async __getRemoteFileStats(sftpClient) {
        const { path: remotePath } = this.getOrigin();
-       return await this.sftpClient.stat(remotePath);
+       return await sftpClient.stat(remotePath);
     }
 
-    __initClientListeners() {
-        this.sftpClient.on('connect', () => {
+    __initClientListeners(sftpClient) {
+        sftpClient.on('connect', () => {
             this.onStart();
         });
 
-        this.sftpClient.on('error', (err) => {
+        sftpClient.on('error', (err) => {
             this.onError(err);
         });
 
-        this.sftpClient.on('end', () => {
+        sftpClient.on('end', () => {
             this.onEnd();
         });
     }
 
-    __startDownload() {
+    __startDownload(sftpClient) {
         const { path: remotePath } = this.getOrigin();
         const { file: destinationFile } = this.getDestionation();
         const { absolutePath: destinationPath } = destinationFile;
 
-        this.sftpClient
+        sftpClient
         .fastGet(remotePath, destinationPath,  {
-            step: (total_transferred, chunk) => {    
+            step: (_, chunk) => {    
                 // emit event progress
                 this.onProgress(chunk);
             }
         })
         .then(() => {
-            this.sftpClient.end();
+            sftpClient.end();
         })
         .catch(err => {
             this.onError(err);

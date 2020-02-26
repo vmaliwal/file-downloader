@@ -11,13 +11,13 @@ export default class FtpDownloader extends BaseDownloader {
 
     async download() {
         try {
-            await this.__connect();
+            await this.__connect(this.ftpClient);
             this.onStart();
     
-            const fileSize = await this.__getRemoteFileStats();
+            const fileSize = await this.__getRemoteFileStats(this.ftpClient);
             this.onDownload(fileSize);            
            
-            this.__startDownload();
+            this.__startDownload(this.ftpClient);
     
         } catch (e) {
             this.onError(e);
@@ -31,9 +31,9 @@ export default class FtpDownloader extends BaseDownloader {
         return new ftp();
     }
 
-    async __connect() {
+    async __connect(ftpClient) {
         const config = this.__getConfig();
-        return await this.ftpClient.connect(config);
+        return await ftpClient.connect(config);
     }
 
     __getConfig() {
@@ -46,14 +46,14 @@ export default class FtpDownloader extends BaseDownloader {
         }
     }
 
-    async __getRemoteFileStats() {
+    async __getRemoteFileStats(ftpClient) {
         const { path: remotePath } = this.getOrigin();
-        return await this.ftpClient.size(remotePath);
+        return await ftpClient.size(remotePath);
     }
 
-    async __startDownload() {
+    async __startDownload(ftpClient) {
         const { path: remotePath } = this.getOrigin();
-        const readStream = await this.ftpClient.get(remotePath);
+        const readStream = await ftpClient.get(remotePath);
     
         readStream.on('data', chunk => {
             this.onProgress(chunk.length);
@@ -64,7 +64,7 @@ export default class FtpDownloader extends BaseDownloader {
         });
 
         readStream.on('end', () => {
-            this.ftpClient.end();
+            ftpClient.end();
             this.onEnd();
         });
 
