@@ -9,11 +9,17 @@ To manage multiple versions of Node.js please consider using [NVM](https://githu
 - [NPM](https://www.npmjs.com/)
 
 ## Installation
+
+Install required dependencies
+
 ```
 $ npm install
 ```
 
 ## Tests
+
+Run tests
+
 ```
 $ npm test
 ```
@@ -28,7 +34,7 @@ $ npm start
 
 Once started it will prompt 2 questions
 
-- 1. Enter download location?
+- 1. Enter download location on local disk?
 - 2. Enter URLs to be downloaded seperated by comma (',')?
 
 Resonable defaults are also provided to test the app, and these defaults can be changed if required by modifying `src/config.js`.

@@ -11,7 +11,7 @@ export default async function DownloaderCli (){
     const urlArray = parseUrls(downloadUrls);
 
     async function promptDownloadLocation() {
-        const txt = `Enter download location?`;
+        const txt = `Enter download location on local disk?`;
         return await cli.prompt(txt, {default: DEFAULT_DESTINATION_DIR});
     }
 
