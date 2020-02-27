@@ -55,9 +55,10 @@ const Main = (async() => {
             bar.update(data.downloaded);
         })
         downloader.on('ERROR', ({ error }) => {
-            console.log("error :", error);
+            console.error(error.message);
             downloader.cleanUp();
-            // also remove progress bar? maybe display an error?
+            const bar = multiBars[i];
+            multiBar.remove(bar);
         })
         downloader.on('END', ({ data }) => {
             const bar = multiBars[i];
@@ -99,8 +100,12 @@ const Main = (async() => {
         const queue = [];
 
         urls.forEach(url => {
-            const downloader = createDownloader(url, destination);
-            queue.unshift(downloader);
+            try {
+                const downloader = createDownloader(url, destination);
+                queue.unshift(downloader);
+            } catch (e) {
+                console.error(e.message);
+            }
         });
         
         return queue;
@@ -111,7 +116,7 @@ const Main = (async() => {
      */
     function initMultiBar() {
         return new cliProgress.MultiBar({
-            format: '  [{bar}] | "{file}" | {percentage}% | {value}/{total} chunks',
+            format: '  [{bar}] | "{file}" | {percentage}% | {value}/{total}',
             clearOnComplete: false,
             hideCursor: true,
             stopOnComplete: true,

@@ -3,6 +3,7 @@ import URLParser from "../src/parser/urlParser";
 import RemoteFileInfo from "../src/file/remoteFileInfo";
 import LocalFileHandler from "../src/file/localFileHandler";
 import { DOWNLOAD_EVENTS } from "../src/config";
+import VError from "verror";
 
 describe('BASE Downloader', () => {
 
@@ -115,11 +116,12 @@ describe('BASE Downloader', () => {
 
         test('on error event', (done) => {
             const err = new Error("Random error");
+            const err1 = new VError(err);
             downloader.on(DOWNLOAD_EVENTS.ERROR, (data) => {
-                expect(data.error).toBe(err);
+                expect(data.error instanceof VError).toBe(true);
                 done();
             });
-            downloader.onError(err);
+            downloader.onError(err1);
         });
     })
 });

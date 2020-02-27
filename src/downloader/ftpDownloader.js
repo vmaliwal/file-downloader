@@ -62,7 +62,8 @@ export default class FtpDownloader extends BaseDownloader {
         return {
             ...FTP_CONFIG_DEFAULT,
             ...origin,
-            user: user
+            user: user,
+            autoReconnect: true
         }
     }
 

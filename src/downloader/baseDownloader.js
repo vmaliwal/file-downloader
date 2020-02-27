@@ -3,6 +3,8 @@ import path from 'path';
 import RemoteFileInfo from '../file/remoteFileInfo';
 import LocalFileHandler from '../file/localFileHandler';
 import { DOWNLOAD_EVENTS } from '../config';
+import { checkLocalPathExist } from '../file/fileUtils';
+import VError from 'verror';
 
 /**
  * Base class that all protocols should be extended
@@ -10,6 +12,12 @@ import { DOWNLOAD_EVENTS } from '../config';
  * at various stages of file download
  */
 export default class BaseDownloader extends EventEmitter {
+    
+    /**
+     * 
+     * @param {UrlParser} urlParser @instance UrlParser 
+     * @param {string} destinationDir  absolute path to destination
+     */
     constructor(urlParser, destinationDir) {
         super();
 
@@ -87,11 +95,12 @@ export default class BaseDownloader extends EventEmitter {
     /**
      * Sets up destination directory and file and returns a new usable
      * instance of LocalFileHandler
-     * @param {string} destinationDir
+     * @param {string} destinationDir  absolute path of destination directory
      * @returns LocalFileHandler
      */
     __setUpDestination(destinationDir) {
         const remoteFileName = this.remoteFileInfo.getFileName();
+        this.__validateDestination(destinationDir);
         return new LocalFileHandler(remoteFileName, destinationDir);
     }
 
@@ -99,7 +108,11 @@ export default class BaseDownloader extends EventEmitter {
      * Calls cleanup method on destination
      */
     cleanUp() {
-        this.destinationFileHandler.cleanUp();
+        try {
+            this.destinationFileHandler.cleanUp();
+        } catch(e) {
+            this.onError(e);
+        }
     }
 
     /**
@@ -150,7 +163,8 @@ export default class BaseDownloader extends EventEmitter {
      * @param {Error} err 
      */
     onError(err) {
-        this.emit(DOWNLOAD_EVENTS.ERROR, { error: err });
+        const err1 = new VError(err, "An error occured in downloader");
+        this.emit(DOWNLOAD_EVENTS.ERROR, { error: err1 });
     }
 
     /**
@@ -258,5 +272,16 @@ export default class BaseDownloader extends EventEmitter {
      */
     __getDownloadSpeed() {
         return this.__stats.bytes;
+    }
+
+    /**
+     * Check if provided destination does exist
+     * @param {string} destination destination path
+     */
+    __validateDestination(destination) {
+        const exist = checkLocalPathExist(destination);
+        if (!exist) {
+            this.onError(new Error("Invalid destination path provided"));
+        }
     }
 }

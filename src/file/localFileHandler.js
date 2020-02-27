@@ -1,5 +1,7 @@
 import path from 'path';
 import fs from 'fs';
+import VError from 'verror';
+import { checkLocalPathExist } from './fileUtils';
 
 /**
  * File handler for local disk
@@ -59,10 +61,11 @@ export default class LocalFileHandler {
     cleanUp() {
         const destination = this.__getDestination();
         try {
-            fs.unlinkSync(destination);
+            if (checkLocalPathExist(destination))
+                fs.unlinkSync(destination);
         } catch(err) {
-            console.log(`error while removing files at ${destination}`);
-            console.log(err);
+            const e = new VError(err, `error while removing files at ${destination}`);
+            throw e;
         }
     }
 

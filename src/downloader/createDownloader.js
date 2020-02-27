@@ -2,6 +2,7 @@ import UrlParser from '../parser/urlParser';
 import HttpsDownloader from './httpsDownloader';
 import SftpDownloader from './sftpDownloader';
 import FtpDownloader from './ftpDownloader';
+import VError from 'verror';
 
 /**
  * Factory funtion to return relevant downloader based of provided URL
@@ -38,7 +39,10 @@ export default function createDownloader(url, destinationFolder) {
             return new SftpDownloader(urlParser, destination);
         else if (protocol === "ftp:")
             return new FtpDownloader(urlParser, destination);
-        else throw new Error("Protocol not supported");
+        else {
+            const err = new VError(`protocol "${protocol}" not supported yet`);
+            throw err;
+        }
     }
 
     const parser = initUrlParser();
