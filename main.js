@@ -1,5 +1,4 @@
 import path from 'path';
-import fs from 'fs';
 import DownloaderCli from './src/view/cli';
 
 import cliProgress from 'cli-progress';
@@ -8,6 +7,9 @@ import { DEFAULT_DESTINATION_DIR } from './src/config';
 import createDownloader from "./src/downloader/createDownloader";
 import { makeDir } from './src/file/fileUtils';
 
+/**
+ * Entry point for the application
+ */
 const Main = (async() => {
     console.log("Welcome to Multi Protocol File Downloader");
 
@@ -23,6 +25,7 @@ const Main = (async() => {
     const multiBars = new Array(queue.length);
 
 
+    // Add listeners for individual downloaders
     queue.forEach((downloader, i) => {
         downloader.on('START', ({ data }) => {
             const bar = multiBar.create(100, 0, {file: data.name});
