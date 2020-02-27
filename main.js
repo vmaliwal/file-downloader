@@ -8,24 +8,6 @@ import { DEFAULT_DESTINATION_DIR } from './src/config';
 import createDownloader from "./src/downloader/createDownloader";
 import { makeDir } from './src/file/fileUtils';
 
-
-//TODOS::
-/*
-    # Add test cases √
-    # Add FTP support √
-    # Add file names to be displayed √
-    # Add listener when internet connection is off
-    # Add cleanup logic when download isn't complete
-    # Check if bitly link is provided we are able to download, along with correct file names
-    # move logic from main function to a seperate file √
-    # Also looking into naming files if file with same names does exist
-    # Provide env variables for SFTP
-    # test SFTP username:password link does work as expected √
-    # Graceful error handling. Add as many tryy catch as possible
-    # Show error if file does not exist on remote server
-
-    # ftp://speedtest:speedtest@ftp.otenet.gr/test100Mb.db
-*/
 const Main = (async() => {
     console.log("Welcome to Multi Protocol File Downloader");
 
