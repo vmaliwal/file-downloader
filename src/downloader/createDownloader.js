@@ -3,14 +3,31 @@ import HttpsDownloader from './httpsDownloader';
 import SftpDownloader from './sftpDownloader';
 import FtpDownloader from './ftpDownloader';
 
+/**
+ * Factory funtion to return relevant downloader based of provided URL
+ * @param {string} url 
+ * @param {string} destinationFolder 
+ * @returns @instance BaseDownloader
+ */
 export default function createDownloader(url, destinationFolder) {
     const _url = url;
     const _destinationFolder = destinationFolder;
 
+    /**
+     * Initialize UrlParser
+     * @param {string} url 
+     * @returns @instance UrlParser
+     */
     const initUrlParser = (url=_url) => {
         return new UrlParser(url);
     }
 
+    /**
+     * Intitialize downloader based on protocol parsed by UrlParser
+     * @param {UrlParser} urlParser 
+     * @param {string} destination 
+     * @returns @instance BaseDownloader
+     */
     const initDownloader = (urlParser, destination = _destinationFolder) => {
         const protocol = urlParser.getProtocol();
         if (!protocol) new Error("Protocol not supported");

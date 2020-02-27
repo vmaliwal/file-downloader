@@ -1,5 +1,8 @@
 import * as URL from 'url';
 
+/**
+ * Utility class to parse URLs
+ */
 export default class URLParser {
     constructor(url) {
         this.url = URL.parse(url);

@@ -57,6 +57,15 @@ describe('BASE Downloader', () => {
         expect(destination.absolutePath).toBe(absPath);
     });
 
+    test('__calcualte stats method', () => {
+        const statsBefore = downloader.__getStats();
+        const chunkLength = 123;
+        const statsAfter = downloader.__calculateStats(chunkLength);
+
+        expect(statsBefore.downloaded).not.toBe(statsAfter.downloaded);
+        expect(statsBefore.name).toBe(statsAfter.name);
+    })
+
     describe('Test event emmitters', () => {
         const name = `test100k.db`;
         let size, chunkLength;
