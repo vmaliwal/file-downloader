@@ -26,9 +26,6 @@ export default class HttpsDownloader extends BaseDownloader {
             
             this.__attachedEventsToReadStream(readStream);
             const writeStream = this.getWriteStream();
-            
-            this.__listenForClientRequestEvent(stream);
-    
             readStream.pipe(writeStream);
         }catch (err) {
             this.onError(err);
@@ -82,17 +79,6 @@ export default class HttpsDownloader extends BaseDownloader {
      */
     __getDataValueOfStream(stream) {
         return stream.data;
-    }
-
-    __listenForClientRequestEvent(stream) {
-        const { req } = stream;
-        req.on('abort', (e) => {
-            this.onError(e);
-        });
-
-        req.on('timeout', (e) => {
-            this.onError(e);
-        })
     }
 
 }
