@@ -16,7 +16,7 @@ export default async function DownloaderCli (){
     }
 
     async function promptDownloadUrls() {
-        const txt = `Enter URLs to be downloaded seperated by comma (',')`;
+        const txt = `Enter URLs to be downloaded seperated by comma (',')?`;
         const defaults = {
             default: DEFAULT_URLS
         }

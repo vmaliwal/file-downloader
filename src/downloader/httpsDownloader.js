@@ -21,12 +21,13 @@ export default class HttpsDownloader extends BaseDownloader {
             const stream = await this.__makeRequest(href);
             const readStream = this.__getDataValueOfStream(stream);
             const fileStat = this.__getRemoteFileStats(readStream);
-    
+            
             this.onDownload(fileStat);
             
             this.__attachedEventsToReadStream(readStream);
-
             const writeStream = this.getWriteStream();
+            
+            this.__listenForClientRequestEvent(stream);
     
             readStream.pipe(writeStream);
         }catch (err) {
@@ -59,6 +60,10 @@ export default class HttpsDownloader extends BaseDownloader {
         readStream.on('end', () => {
             this.onEnd();
         });
+
+        readStream.on('timeout', (err) => {
+            this.onError(err);
+        })
     }
 
     /**
@@ -77,6 +82,17 @@ export default class HttpsDownloader extends BaseDownloader {
      */
     __getDataValueOfStream(stream) {
         return stream.data;
+    }
+
+    __listenForClientRequestEvent(stream) {
+        const { req } = stream;
+        req.on('abort', (e) => {
+            this.onError(e);
+        });
+
+        req.on('timeout', (e) => {
+            this.onError(e);
+        })
     }
 
 }

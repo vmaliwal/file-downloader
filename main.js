@@ -1,6 +1,7 @@
 import path from 'path';
 import DownloaderCli from './src/view/cli';
-
+import fs from 'fs';
+import util from 'util';
 import cliProgress from 'cli-progress';
 
 import { DEFAULT_DESTINATION_DIR } from './src/config';
@@ -108,5 +109,18 @@ const Main = (async() => {
         });
     }
 
+    const fs = require('fs');
+    const util = require('util');
+    const log_file = fs.createWriteStream(__dirname + '/debug.log', {flags : 'w'});
+    const log_stdout = process.stdout;
+    
+    console.error = function(d) { //
+      log_file.write(util.format(d) + '\n');
+      log_stdout.write(util.format(d) + '\n');
+    };
+    
+
 })();
+
+
 export default Main;

@@ -6,9 +6,11 @@ import fs from 'fs';
  */
 export function makeDir(path) {
     if(!checkLocalPathExist(path)) {
-        fs.mkdir(path,  { recursive: true }, (err) => {
-            if (err) throw err;
-        });
+        try {
+            fs.mkdirSync(path, {recursive: true});
+        } catch(err) {
+            throw err;
+        }
     }
 }
 
